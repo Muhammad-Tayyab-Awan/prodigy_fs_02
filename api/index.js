@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 import express from "express";
+import dbConnect from "./utils/dbConnect.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -35,5 +36,10 @@ app.all(/(.*)/, (req, res) => {
 
 app.listen(PORT, () => {
   console.clear();
+  if (dbConnect()) {
+    console.log("Connected to DB successfully");
+  } else {
+    console.log("DB connection failed");
+  }
   console.log(`Server is running on http://localhost:${PORT}`);
 });
