@@ -7,10 +7,11 @@ import dbConnect from "./utils/dbConnect.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 import authRoute from "./routes/auth.js";
+import verifyLogin from "./middleware/verifyLogin.js";
 
 app.use(bodyParser.json());
 app.use(cookieParser());
-
+app.use(verifyLogin);
 app.use("/api/auth", authRoute);
 
 app.get("/", (req, res) => {
