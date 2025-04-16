@@ -100,6 +100,11 @@ router.post(
   ],
   async (req, res) => {
     try {
+      const { userStatus } = req;
+      if (userStatus.loggedIn)
+        return res
+          .status(404)
+          .json({ resStatus: false, error: "You are already logged in" });
       const result = validationResult(req);
       if (!result.isEmpty())
         return res.status(404).json({ resStatus: false, error: result.errors });
@@ -227,6 +232,29 @@ router.get("/logout", async (req, res) => {
     res
       .status(200)
       .json({ resStatus: true, message: "You are successfully logged out" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error Occurred on Server Side",
+      message: error.message,
+    });
+  }
+});
+
+router.get("/delete", async (req, res) => {
+  try {
+    const { userStatus } = req;
+    if (!userStatus.loggedIn)
+      return res.status(404).json({
+        resStatus: false,
+        error: "You are not logged into any account",
+      });
+    const { userId } = userStatus;
+    await User.findByIdAndDelete(userId);
+    res.clearCookie("ems_auth_token");
+    res
+      .status(200)
+      .json({ resStatus: true, message: "Your account deleted successfully" });
   } catch (error) {
     res.status(500).json({
       success: false,
