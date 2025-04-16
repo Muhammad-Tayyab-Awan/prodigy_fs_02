@@ -33,6 +33,12 @@ router.post(
   ],
   async (req, res) => {
     try {
+      const { userStatus } = req;
+      if (userStatus.loggedIn)
+        return res.status(404).json({
+          resStatus: false,
+          error: "Logout first to register new account",
+        });
       const result = validationResult(req);
       if (!result.isEmpty())
         return res.status(404).json({
@@ -143,7 +149,7 @@ router.post(
         mailSender.sendMail(
           {
             to: userExist.email,
-            from: "EMS by Tayyab Awan",
+            sender: "EMS by Tayyab Awan",
             subject: "Account Verification",
             html: htmlMessage,
           },
@@ -208,7 +214,7 @@ router.get(
         });
         return res.status(200).json({
           resStatus: true,
-          message: `Welcome to EMS! ${userExist.name}`,
+          message: `Welcome to EMS! ${userExist.name}! Your account verified successfully`,
         });
       });
     } catch (error) {
