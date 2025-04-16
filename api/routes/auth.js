@@ -110,7 +110,7 @@ router.post(
           resStatus: false,
           error: "Please provide correct credentials",
         });
-      const passwordMatch = bcrypt.compare(password, userExist.password);
+      const passwordMatch = await bcrypt.compare(password, userExist.password);
       if (!passwordMatch)
         return res.status(404).json({
           resStatus: false,
@@ -215,5 +215,25 @@ router.get(
     }
   },
 );
+
+router.get("/logout", async (req, res) => {
+  try {
+    if (!req.userStatus.loggedIn)
+      return res.status(404).json({
+        resStatus: false,
+        error: "You are not logged into any account",
+      });
+    res.clearCookie("ems_auth_token");
+    res
+      .status(200)
+      .json({ resStatus: true, message: "You are successfully logged out" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error Occurred on Server Side",
+      message: error.message,
+    });
+  }
+});
 
 export default router;
