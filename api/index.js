@@ -11,7 +11,7 @@ import authRoute from "./routes/auth.js";
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.use("auth", authRoute);
+app.use("/api/auth", authRoute);
 
 app.get("/", (req, res) => {
   try {
