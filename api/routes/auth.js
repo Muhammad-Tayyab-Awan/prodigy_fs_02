@@ -127,7 +127,12 @@ router.post(
           resStatus: false,
           error: "Please provide correct credentials",
         });
-      if (userExist.verified) {
+      if (userExist.emailVerified) {
+        if (!userExist.userVerified)
+          return res.status(404).json({
+            resStatus: false,
+            error: "You are not yet verified by admin",
+          });
         const authToken = jwt.sign(
           { userId: userExist.id.toString() },
           jwtSecret,
@@ -163,7 +168,7 @@ router.post(
             res.status(200).json({
               resStatus: false,
               error:
-                "We have sent you a verification email please check your mailbox to verify and login",
+                "We have sent you an email to verify your email please check your mailbox to verify and login",
             });
           },
         );
@@ -198,12 +203,17 @@ router.get(
           return res
             .status(404)
             .json({ resStatus: false, error: "Invalid request" });
-        if (userExist.verified)
+        if (userExist.emailVerified)
           return res
             .status(404)
-            .json({ resStatus: false, error: "Your account already verified" });
-        userExist.verified = true;
+            .json({ resStatus: false, error: "Your email already verified" });
+        userExist.emailVerified = true;
         await userExist.save();
+        if (!userExist.userVerified)
+          return res.status(404).json({
+            resStatus: false,
+            error: "You are not yet verified by admin",
+          });
         const authToken = jwt.sign(
           { userId: userExist.id.toString() },
           jwtSecret,
