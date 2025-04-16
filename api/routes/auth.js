@@ -1,8 +1,13 @@
+/* eslint-disable no-undef */
 import express from "express";
 const router = express.Router();
 import bcrypt from "bcryptjs";
-import { body, validationResult } from "express-validator";
+import { body, param, validationResult } from "express-validator";
 import User from "../models/Users.js";
+import jwt from "jsonwebtoken";
+const jwtSecret = process.env.JWT_SECRET;
+import mailSender from "../utils/mailSender.js";
+const apiURI = process.env.API_URI;
 
 router.post(
   "/register",
@@ -68,6 +73,138 @@ router.post(
       res.status(200).json({
         resStatus: true,
         message: "Your account registered successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: "Error Occurred on Server Side",
+        message: error.message,
+      });
+    }
+  },
+);
+
+router.post(
+  "/login",
+  [
+    body("email").isEmail(),
+    body("password")
+      .isStrongPassword({
+        minLowercase: 3,
+        minUppercase: 2,
+        minNumbers: 2,
+        minSymbols: 1,
+        minLength: 8,
+      })
+      .isLength({ max: 18 }),
+  ],
+  async (req, res) => {
+    try {
+      const result = validationResult(req);
+      if (!result.isEmpty())
+        return res.status(404).json({ resStatus: false, error: result.errors });
+      const { email, password } = req.body;
+      const userExist = await User.findOne({ email: email });
+      if (!userExist)
+        return res.status(404).json({
+          resStatus: false,
+          error: "Please provide correct credentials",
+        });
+      const passwordMatch = bcrypt.compare(password, userExist.password);
+      if (!passwordMatch)
+        return res.status(404).json({
+          resStatus: false,
+          error: "Please provide correct credentials",
+        });
+      if (userExist.verified) {
+        const authToken = jwt.sign(
+          { userId: userExist.id.toString() },
+          jwtSecret,
+        );
+        res.cookie("ems_auth_token", authToken, {
+          secure: true,
+          maxAge: 604800000,
+        });
+        return res.status(200).json({
+          resStatus: true,
+          message: `Welcome back ${userExist.name} to EMS`,
+        });
+      } else {
+        const verificationToken = jwt.sign(
+          { userId: userExist.id.toString() },
+          jwtSecret,
+        );
+        const htmlMessage = `Dear ${userExist.username}!<br/><b>Please verify your account</b><br/><a href="${apiURI}/api/auth/verify/${verificationToken}">Verify Now</a>`;
+        mailSender.sendMail(
+          {
+            to: userExist.email,
+            from: "EMS by Tayyab Awan",
+            subject: "Account Verification",
+            html: htmlMessage,
+          },
+          (err) => {
+            if (err) {
+              return res.status(400).json({
+                resStatus: false,
+                error: err.message,
+              });
+            }
+            res.status(200).json({
+              resStatus: false,
+              error:
+                "We have sent you a verification email please check your mailbox to verify and login",
+            });
+          },
+        );
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: "Error Occurred on Server Side",
+        message: error.message,
+      });
+    }
+  },
+);
+
+router.get(
+  "/verify/:verificationToken",
+  param("verificationToken").isJWT(),
+  async (req, res) => {
+    try {
+      const result = validationResult(req);
+      if (!result.isEmpty())
+        return res.status(404).json({ resStatus: false, error: result.errors });
+      const { verificationToken } = req.params;
+      jwt.verify(verificationToken, jwtSecret, async (err, decodedToken) => {
+        if (err)
+          return res
+            .status(404)
+            .json({ resStatus: false, error: "Invalid request" });
+        const { userId } = decodedToken;
+        const userExist = await User.findById(userId);
+        if (!userExist)
+          return res
+            .status(404)
+            .json({ resStatus: false, error: "Invalid request" });
+        if (userExist.verified)
+          return res
+            .status(404)
+            .json({ resStatus: false, error: "Your account already verified" });
+        userExist.verified = true;
+        await userExist.save();
+        const authToken = jwt.sign(
+          { userId: userExist.id.toString() },
+          jwtSecret,
+        );
+        res.cookie("ems_auth_token", authToken, {
+          secure: true,
+          maxAge: 604800000,
+        });
+        return res.status(200).json({
+          resStatus: true,
+          message: `Welcome to EMS! ${userExist.name}`,
+        });
       });
     } catch (error) {
       res.status(500).json({
