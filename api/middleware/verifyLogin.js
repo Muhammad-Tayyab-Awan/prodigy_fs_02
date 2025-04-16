@@ -18,7 +18,7 @@ const verifyLogin = (req, res, next) => {
       }
       const { userId } = decodedToken;
       const userExist = await User.findById(userId);
-      if (!(userExist && userExist.verified)) {
+      if (!(userExist && userExist.emailVerified && userExist.userVerified)) {
         req.userStatus = { loggedIn: false };
         return next();
       }
