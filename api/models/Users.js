@@ -16,7 +16,11 @@ const userSchema = new Schema(
       required: true,
       unique: true,
     },
-    verified: {
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    userVerified: {
       type: Boolean,
       default: false,
     },
