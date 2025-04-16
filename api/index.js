@@ -6,9 +6,12 @@ import express from "express";
 import dbConnect from "./utils/dbConnect.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
+import authRoute from "./routes/auth.js";
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+app.use("auth", authRoute);
 
 app.get("/", (req, res) => {
   try {
