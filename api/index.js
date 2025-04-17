@@ -8,13 +8,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 import authRoute from "./routes/auth.js";
 import adminRoute from "./routes/admin.js";
+import attendanceRoute from "./routes/attendance.js";
 import verifyLogin from "./middleware/verifyLogin.js";
 
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(verifyLogin);
 app.use("/api/auth", authRoute);
-app.use("/api/ADMIN", adminRoute);
+app.use("/api/admin", adminRoute);
+app.use("/api/attendance", attendanceRoute);
 
 app.get("/", (req, res) => {
   try {
