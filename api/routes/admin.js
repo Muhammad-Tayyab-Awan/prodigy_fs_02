@@ -229,6 +229,55 @@ router.get("/leaves", async (req, res) => {
   }
 });
 
+router.get(
+  "/leaves/:leaveId/:submitStatus",
+  [
+    param("leaveId").isMongoId(),
+    param("submitStatus").isIn(["reject", "approve"]),
+  ],
+  async (req, res) => {
+    try {
+      const { userStatus } = req;
+      if (!(userStatus.loggedIn && userStatus.role === "admin"))
+        return res.status(404).json({
+          resStatus: false,
+          error: "Please login to your admin account",
+        });
+      const result = validationResult(req);
+      if (!result.isEmpty())
+        return res.status(400).json({ resStatus: false, error: result.errors });
+      const { leaveId, submitStatus } = req.params;
+      const leaveExist = await Leave.findById(leaveId);
+      if (!leaveExist)
+        return res
+          .status(404)
+          .json({ resStatus: false, error: "No leave found with that id" });
+      if (leaveExist.status !== "pending")
+        return res.status(400).json({
+          resStatus: false,
+          error: `This leave is already ${leaveExist.status}`,
+        });
+      leaveExist.status = submitStatus === "reject" ? "rejected" : "approved";
+      if (submitStatus === "reject") {
+        await Attendance.findByIdAndUpdate(leaveExist.attendanceId, {
+          status: "absent",
+        });
+      }
+      await leaveExist.save();
+      res.status(200).json({
+        resStatus: true,
+        message: `Leave request ${submitStatus === "reject" ? "rejected" : "approved"}`,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: "Error Occurred on Server Side",
+        message: error.message,
+      });
+    }
+  },
+);
+
 router.get("/attendances", async (req, res) => {
   try {
     const { userStatus } = req;
