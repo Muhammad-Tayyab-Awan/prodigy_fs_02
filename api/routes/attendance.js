@@ -60,6 +60,48 @@ router.post(
   },
 );
 
+router.get("/", async (req, res) => {
+  try {
+    const { userStatus } = req;
+    if (!(userStatus.loggedIn && userStatus.role === "user"))
+      return res.status(404).json({
+        resStatus: false,
+        error: "Please login to your account to mark your attendance",
+      });
+    const currTime = new Date();
+    const attendanceMarked = await Attendance.findOne({
+      employeeId: userStatus.userId,
+      markedOn: currTime.toLocaleString().split(",")[0],
+    });
+    if (attendanceMarked)
+      return res.status(400).json({
+        resStatus: true,
+        error: `You are ${attendanceMarked.status === "leave" ? "on leave" : attendanceMarked.status} today`,
+      });
+    if (currTime.getHours() <= endingHour && currTime.getHours() > startingHour)
+      return res.json({
+        resStatus: false,
+        error: "Please mark your today's attendance",
+      });
+    if (currTime.getHours() < startingHour)
+      return res.status(404).json({
+        resStatus: false,
+        error: "Please wait for start time to mark your attendance",
+      });
+    if (currTime.getHours() > endingHour)
+      return res.status(404).json({
+        resStatus: false,
+        error: "You can't mark your attendance out of time",
+      });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error Occurred on Server Side",
+      message: error.message,
+    });
+  }
+});
+
 router.get("/leave", async (req, res) => {
   try {
     const { userStatus } = req;
