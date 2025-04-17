@@ -1,5 +1,5 @@
 import express from "express";
-import { body, validationResult } from "express-validator";
+import { body, param, validationResult } from "express-validator";
 const router = express.Router();
 import bcrypt from "bcryptjs";
 import User from "../models/Users.js";
@@ -113,6 +113,43 @@ router.get("/admins", async (req, res) => {
       });
     const Admins = await User.find({ role: "admin" }).select("-password");
     res.status(200).json({ resStatus: true, Admins });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error Occurred on Server Side",
+      message: error.message,
+    });
+  }
+});
+
+router.get("/verify/:userId", param("userId").isMongoId(), async (req, res) => {
+  try {
+    const { userStatus } = req;
+    if (!(userStatus.loggedIn && userStatus.role === "admin"))
+      return res.status(404).json({
+        resStatus: false,
+        error: "Please login to your admin account",
+      });
+    const result = validationResult(req);
+    if (!result.isEmpty())
+      return res.status(404).json({ resStatus: false, error: result.errors });
+    const { userId } = req.params;
+    const userExist = await User.findOne({ _id: userId, role: "user" });
+    if (!userExist)
+      return res.status(404).json({
+        resStatus: false,
+        error: "Invalid request no user exist with that id",
+      });
+    if (userExist.userVerified)
+      return res.status(404).json({
+        resStatus: false,
+        error: "Invalid request user account already verified",
+      });
+    userExist.userVerified = true;
+    await userExist.save();
+    res
+      .status(200)
+      .json({ resStatus: true, message: "User account verified successfully" });
   } catch (error) {
     res.status(500).json({
       success: false,
