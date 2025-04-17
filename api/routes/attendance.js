@@ -152,4 +152,25 @@ router.get("/leave", async (req, res) => {
   }
 });
 
+router.get("/total", async (req, res) => {
+  try {
+    const { userStatus } = req;
+    if (!(userStatus.loggedIn && userStatus.role === "user"))
+      return res.status(404).json({
+        resStatus: false,
+        error: "Please login to your account to mark your attendance",
+      });
+    const userAttendance = await Attendance.find({
+      employeeId: userStatus.userId,
+    });
+    res.status(200).json({ resStatus: true, userAttendance });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error Occurred on Server Side",
+      message: error.message,
+    });
+  }
+});
+
 export default router;
