@@ -159,4 +159,35 @@ router.get("/verify/:userId", param("userId").isMongoId(), async (req, res) => {
   }
 });
 
+router.get("/delete/:userId", param("userId").isMongoId(), async (req, res) => {
+  try {
+    const { userStatus } = req;
+    if (!(userStatus.loggedIn && userStatus.role === "admin"))
+      return res.status(404).json({
+        resStatus: false,
+        error: "Please login to your admin account",
+      });
+    const result = validationResult(req);
+    if (!result.isEmpty())
+      return res.status(404).json({ resStatus: false, error: result.errors });
+    const { userId } = req.params;
+    const userExist = await User.findById(userId);
+    if (!userExist)
+      return res.status(404).json({
+        resStatus: false,
+        error: "Invalid request no user exist with that id",
+      });
+    await User.findByIdAndDelete(userId);
+    res
+      .status(200)
+      .json({ resStatus: true, message: "User account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error Occurred on Server Side",
+      message: error.message,
+    });
+  }
+});
+
 export default router;
