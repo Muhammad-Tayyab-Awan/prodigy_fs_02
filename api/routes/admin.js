@@ -229,4 +229,23 @@ router.get("/leaves", async (req, res) => {
   }
 });
 
+router.get("/attendances", async (req, res) => {
+  try {
+    const { userStatus } = req;
+    if (!(userStatus.loggedIn && userStatus.role === "admin"))
+      return res.status(404).json({
+        resStatus: false,
+        error: "Please login to your admin account",
+      });
+    const allAttendances = await Attendance.find();
+    res.status(200).json({ resStatus: true, allAttendances });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error Occurred on Server Side",
+      message: error.message,
+    });
+  }
+});
+
 export default router;
