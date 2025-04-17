@@ -265,6 +265,16 @@ router.get("/delete", async (req, res) => {
         resStatus: false,
         error: "You are not logged into any account",
       });
+    if (userStatus.role === "admin") {
+      let adminsCount = await User.find({ role: "admin" });
+      adminsCount = adminsCount.length;
+      if (adminsCount === 1)
+        return res.status(404).json({
+          resStatus: false,
+          error:
+            "You are the only admin so you can't delete your account in order to do that please add another admin",
+        });
+    }
     const { userId } = userStatus;
     await User.findByIdAndDelete(userId);
     res.clearCookie("ems_auth_token");
