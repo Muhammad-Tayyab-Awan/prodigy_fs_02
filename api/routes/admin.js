@@ -177,6 +177,18 @@ router.get("/delete/:userId", param("userId").isMongoId(), async (req, res) => {
         resStatus: false,
         error: "Invalid request no user exist with that id",
       });
+    if (userExist.role === "admin") {
+      let adminsCount = await User.find({ role: "admin" });
+      adminsCount = adminsCount.length;
+      if (adminsCount === 1)
+        return res.status(404).json({
+          resStatus: false,
+          error:
+            "You are the only admin so you can't delete your account in order to do that please add another admin",
+        });
+      if (userExist.id.toString() === userStatus.userId)
+        res.clearCookie("ems_auth_token");
+    }
     await User.findByIdAndDelete(userId);
     res
       .status(200)
