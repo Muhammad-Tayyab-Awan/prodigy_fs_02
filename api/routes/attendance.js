@@ -4,6 +4,7 @@ const router = express.Router();
 const startingHour = process.env.START_TIME;
 const endingHour = process.env.END_TIME;
 import Attendance from "../models/Attendance.js";
+import Leave from "../models/Leave.js";
 import { body, validationResult } from "express-validator";
 
 router.post(
@@ -58,5 +59,55 @@ router.post(
     }
   },
 );
+
+router.get("/leave", async (req, res) => {
+  try {
+    const { userStatus } = req;
+    if (!(userStatus.loggedIn && userStatus.role === "user"))
+      return res.status(404).json({
+        resStatus: false,
+        error: "Please login to your account to mark your attendance",
+      });
+    const currTime = new Date();
+    const attendanceMarked = await Attendance.findOne({
+      employeeId: userStatus.userId,
+      markedOn: currTime.toLocaleString().split(",")[0],
+    });
+    if (attendanceMarked)
+      return res.status(400).json({
+        resStatus: false,
+        error: "Your attendance marked already so you can't submit your leave",
+      });
+    if (currTime.getHours() < startingHour)
+      return res.status(404).json({
+        resStatus: false,
+        error: "Please wait for start time to submit your leave",
+      });
+    if (currTime.getHours() > endingHour)
+      return res.status(404).json({
+        resStatus: false,
+        error: "You are not allowed to submit your attendance out of time",
+      });
+    const newAttendance = await Attendance.create({
+      employeeId: userStatus.userId,
+      markedOn: currTime.toLocaleString().split(",")[0],
+      status: "leave",
+    });
+    await Leave.create({
+      employeeId: userStatus.userId,
+      attendanceId: newAttendance.id,
+    });
+    res.status(200).json({
+      resStatus: true,
+      message: "Your leave is submitted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error Occurred on Server Side",
+      message: error.message,
+    });
+  }
+});
 
 export default router;
