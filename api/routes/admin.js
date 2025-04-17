@@ -3,6 +3,8 @@ import { body, param, validationResult } from "express-validator";
 const router = express.Router();
 import bcrypt from "bcryptjs";
 import User from "../models/Users.js";
+import Attendance from "../models/Attendance.js";
+import Leave from "../models/Leave.js";
 
 router.post(
   "/add-admin",
@@ -189,6 +191,8 @@ router.get("/delete/:userId", param("userId").isMongoId(), async (req, res) => {
       if (userExist.id.toString() === userStatus.userId)
         res.clearCookie("ems_auth_token");
     }
+    await Attendance.deleteMany({ employeeId: userId });
+    await Leave.deleteMany({ employeeId: userId });
     await User.findByIdAndDelete(userId);
     res
       .status(200)

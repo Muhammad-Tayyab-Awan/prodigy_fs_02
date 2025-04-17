@@ -4,6 +4,8 @@ const router = express.Router();
 import bcrypt from "bcryptjs";
 import { body, param, validationResult } from "express-validator";
 import User from "../models/Users.js";
+import Attendance from "../models/Attendance.js";
+import Leave from "../models/Leave.js";
 import jwt from "jsonwebtoken";
 const jwtSecret = process.env.JWT_SECRET;
 import mailSender from "../utils/mailSender.js";
@@ -276,6 +278,8 @@ router.get("/delete", async (req, res) => {
         });
     }
     const { userId } = userStatus;
+    await Attendance.deleteMany({ employeeId: userId });
+    await Leave.deleteMany({ employeeId: userId });
     await User.findByIdAndDelete(userId);
     res.clearCookie("ems_auth_token");
     res
