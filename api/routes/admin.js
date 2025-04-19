@@ -403,4 +403,76 @@ router.post(
   },
 );
 
+router.put(
+  "/attendance/:userId",
+  [
+    param("userId").isMongoId(),
+    body("status").isIn(
+      ["absent", "present", "leave"],
+      body("markedOn").isISO8601({ strictSeparator: true }),
+    ),
+  ],
+  async (req, res) => {
+    try {
+      const { userStatus } = req;
+      if (!(userStatus.loggedIn && userStatus.role === "admin"))
+        return res.status(404).json({
+          resStatus: false,
+          error: "Please login to your admin account",
+        });
+      const result = validationResult(req);
+      if (!result.isEmpty())
+        return res.status(400).json({ resStatus: false, error: result.errors });
+      const { userId } = req.params;
+      const userExist = await User.findById(userId);
+      if (!(userExist && userExist.role === "user"))
+        return res
+          .status(404)
+          .json({ resStatus: false, error: "No user exist with that id" });
+      if (!userExist.userVerified)
+        return res.status(404).json({
+          resStatus: false,
+          error: "User you are looking for is not yet verified",
+        });
+      const { status, markedOn } = req.body;
+      const attendanceMarked = await Attendance.findOne({
+        employeeId: userId,
+        markedOn: new Date(markedOn).toLocaleString().split(",")[0],
+      });
+      if (!attendanceMarked)
+        return res.status(400).json({
+          resStatus: false,
+          error: `User's attendance is not marked for ${markedOn}`,
+        });
+      if (status === "leave") {
+        if (
+          attendanceMarked.status === "absent" ||
+          attendanceMarked.status === "present"
+        ) {
+          await Leave.create({
+            employeeId: userId,
+            attendanceId: attendanceMarked.id,
+            status: "approved",
+          });
+        }
+      }
+      if (attendanceMarked.status === "leave" && status !== "leave") {
+        await Leave.deleteOne({ attendanceId: attendanceMarked.id });
+      }
+      attendanceMarked.status = status;
+      await attendanceMarked.save();
+      res.status(200).json({
+        resStatus: true,
+        message: "User attendance is updated successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: "Error Occurred on Server Side",
+        message: error.message,
+      });
+    }
+  },
+);
+
 export default router;
