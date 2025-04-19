@@ -294,4 +294,17 @@ router.get("/delete", async (req, res) => {
   }
 });
 
+router.get("/loginStatus", async (req, res) => {
+  try {
+    const { userStatus } = req;
+    return res.json({ loggedIn: userStatus.loggedIn, role: userStatus.role });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error Occurred on Server Side",
+      message: error.message,
+    });
+  }
+});
+
 export default router;
