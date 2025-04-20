@@ -1,7 +1,7 @@
-const apiUri = import.meta.VITE_API_URI;
+const apiUri = import.meta.env.VITE_API_URI;
 
 const getLoginStatus = async () => {
-  const jsonResponse = await fetch(`${apiUri}api/auth/loginStatus`, {
+  const jsonResponse = await fetch(`${apiUri}api/auth/login-status`, {
     method: "GET",
     credentials: "include",
   });

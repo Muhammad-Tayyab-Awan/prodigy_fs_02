@@ -294,7 +294,7 @@ router.get("/delete", async (req, res) => {
   }
 });
 
-router.get("/loginStatus", async (req, res) => {
+router.get("/login-status", async (req, res) => {
   try {
     const { userStatus } = req;
     return res.json({ loggedIn: userStatus.loggedIn, role: userStatus.role });
