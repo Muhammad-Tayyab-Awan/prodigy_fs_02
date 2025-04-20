@@ -12,10 +12,11 @@ const useAuth = () => {
   if (isLoggedIn.loggedIn === null) {
     return { isLoading: true };
   }
-  if (!isLoggedIn) {
+  if (isLoggedIn.loggedIn === false) {
     return { isLoggedIn: false };
+  } else {
+    return { isLoggedIn: true, role: isLoggedIn.role };
   }
-  return { isLoggedIn: true, role: isLoggedIn.role };
 };
 
 export default useAuth;
