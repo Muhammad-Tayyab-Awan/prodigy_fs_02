@@ -1,5 +1,5 @@
+import AppRouter from "./router/router";
 function App() {
-  return <>Welcome to EMS</>;
+  return <AppRouter />;
 }
-
 export default App;
