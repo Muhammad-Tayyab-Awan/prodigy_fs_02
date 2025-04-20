@@ -5,12 +5,14 @@ import "dotenv/config";
 import express from "express";
 import dbConnect from "./utils/dbConnect.js";
 const app = express();
+import cors from "cors";
 const PORT = process.env.PORT || 3000;
 import authRoute from "./routes/auth.js";
 import adminRoute from "./routes/admin.js";
 import attendanceRoute from "./routes/attendance.js";
 import verifyLogin from "./middleware/verifyLogin.js";
 
+app.use(cors({ credentials: true, origin: process.env.ORIGIN }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(verifyLogin);
