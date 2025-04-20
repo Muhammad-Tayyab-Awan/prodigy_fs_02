@@ -13,7 +13,7 @@ const useAuth = () => {
     return { isLoading: true };
   }
   if (!isLoggedIn) {
-    return { isLoggedIn: false, redirectToLogin: true };
+    return { isLoggedIn: false };
   }
   return { isLoggedIn: true, role: isLoggedIn.role };
 };
