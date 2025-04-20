@@ -35,6 +35,24 @@ async function register(credentials) {
   return response;
 }
 
-const authApi = { getLoginStatus, login, register };
+async function logout() {
+  const jsonResponse = await fetch(`${apiUri}api/auth/logout`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const response = await jsonResponse.json();
+  return response;
+}
+
+async function verifyEmail(authToken) {
+  const jsonResponse = await fetch(`${apiUri}api/auth/verify/${authToken}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const response = await jsonResponse.json();
+  return response;
+}
+
+const authApi = { getLoginStatus, login, register, logout, verifyEmail };
 
 export default authApi;
