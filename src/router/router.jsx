@@ -5,16 +5,38 @@ import Profile from "../pages/profile/index";
 import Register from "../pages/register";
 import Logout from "../pages/logout";
 import NotFound from "../pages/not-found";
+import ProtectedRoutes from "../components/ProtectedRoutes";
 
 function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoutes allowedRoles={["admin", "user"]}>
+              <Dashboard />
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoutes allowedRoles={["admin", "user"]}>
+              <Profile />
+            </ProtectedRoutes>
+          }
+        />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/logout" element={<Logout />} />
+        <Route
+          path="/logout"
+          element={
+            <ProtectedRoutes allowedRoles={["admin", "user"]}>
+              <Logout />
+            </ProtectedRoutes>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
