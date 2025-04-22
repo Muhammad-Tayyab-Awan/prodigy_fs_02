@@ -53,6 +53,22 @@ async function verifyEmail(authToken) {
   return response;
 }
 
-const authApi = { getLoginStatus, login, register, logout, verifyEmail };
+async function getUserData() {
+  const jsonResponse = await fetch(`${apiUri}api/auth/`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const response = await jsonResponse.json();
+  return response;
+}
+
+const authApi = {
+  getLoginStatus,
+  login,
+  register,
+  logout,
+  verifyEmail,
+  getUserData,
+};
 
 export default authApi;
