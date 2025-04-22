@@ -6,6 +6,7 @@ import Register from "../pages/register";
 import Logout from "../pages/logout";
 import NotFound from "../pages/not-found";
 import ProtectedRoutes from "../components/ProtectedRoutes";
+import Verify from "../pages/verify";
 
 function AppRouter() {
   return (
@@ -37,6 +38,7 @@ function AppRouter() {
             </ProtectedRoutes>
           }
         />
+        <Route path="/verify/:authToken" element={<Verify />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
