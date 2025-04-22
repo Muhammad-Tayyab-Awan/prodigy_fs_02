@@ -9,7 +9,7 @@ import Leave from "../models/Leave.js";
 import jwt from "jsonwebtoken";
 const jwtSecret = process.env.JWT_SECRET;
 import mailSender from "../utils/mailSender.js";
-const apiURI = process.env.API_URI;
+const frontEndURI = process.env.FRONTEND_URI;
 
 router.post(
   "/register",
@@ -152,7 +152,7 @@ router.post(
           { userId: userExist.id.toString() },
           jwtSecret,
         );
-        const htmlMessage = `Dear ${userExist.username}!<br/><b>Please verify your account</b><br/><a href="${apiURI}/api/auth/verify/${verificationToken}">Verify Now</a>`;
+        const htmlMessage = `Dear ${userExist.username}!<br/><b>Please verify your account</b><br/><a href="${frontEndURI}/verify/${verificationToken}">Verify Now</a>`;
         mailSender.sendMail(
           {
             to: userExist.email,
