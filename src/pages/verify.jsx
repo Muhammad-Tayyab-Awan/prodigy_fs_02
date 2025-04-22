@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import "./style.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -27,7 +28,7 @@ function Verify() {
         navigate("/");
       }, 3000);
     });
-  }, [authToken, navigate]);
+  }, [authToken]);
   return (
     <div className="min-h-screen w-full overflow-auto bg-purple-400">
       {validation === "validating" && (
