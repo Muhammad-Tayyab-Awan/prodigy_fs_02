@@ -62,6 +62,15 @@ async function getUserData() {
   return response;
 }
 
+async function deleteAccount() {
+  const jsonResponse = await fetch(`${apiUri}api/auth/delete`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const response = await jsonResponse.json();
+  return response;
+}
+
 const authApi = {
   getLoginStatus,
   login,
@@ -69,6 +78,7 @@ const authApi = {
   logout,
   verifyEmail,
   getUserData,
+  deleteAccount,
 };
 
 export default authApi;
