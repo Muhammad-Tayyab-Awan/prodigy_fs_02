@@ -11,6 +11,25 @@ const jwtSecret = process.env.JWT_SECRET;
 import mailSender from "../utils/mailSender.js";
 const frontEndURI = process.env.FRONTEND_URI;
 
+router.get("/", async (req, res) => {
+  try {
+    const { userStatus } = req;
+    if (!userStatus.loggedIn)
+      return res.status(400).json({
+        resStatus: false,
+        error: "Login first to get your data",
+      });
+    const userData = await User.findById(userStatus.userId).select("-password");
+    res.status(200).json({ resStatus: true, userData });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error Occurred on Server Side",
+      message: error.message,
+    });
+  }
+});
+
 router.post(
   "/register",
   [
