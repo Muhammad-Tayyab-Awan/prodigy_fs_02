@@ -74,14 +74,23 @@ function Profile() {
             </span>
           </div>
         </div>
-        <div
-          className="my-4 flex cursor-pointer items-center justify-center gap-2"
-          onClick={handleDeletion}
-        >
-          <img src="/trash-solid.svg" alt="delete" className="h-4" />
-          <span className="text-xs font-medium text-red-600">
-            Delete Account
-          </span>
+        <div className="mx-auto my-4 flex w-[50%] items-center justify-between gap-3">
+          <div
+            className="flex cursor-pointer items-center justify-center gap-2"
+            onClick={handleDeletion}
+          >
+            <img src="/trash-solid.svg" alt="delete" className="h-4" />
+            <span className="text-xs font-medium text-red-600">
+              Delete Account
+            </span>
+          </div>
+          <a
+            href="/logout"
+            className="flex cursor-pointer items-center justify-center gap-2"
+          >
+            <img src="/logout.svg" alt="logout" className="h-4" />
+            <span className="text-xs font-medium text-[#6434f4]">Logout</span>
+          </a>
         </div>
       </div>
       <Toaster position="bottom-center" />
