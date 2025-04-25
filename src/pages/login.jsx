@@ -1,6 +1,6 @@
 import "./style.css";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useAuth from "../hooks/useAuth";
 import Loading from "../components/Loading";
 import authApi from "../api/authApi";
@@ -134,12 +134,12 @@ function Login() {
             <div className="flex w-full items-center justify-between">
               {formField === "email" ? (
                 <>
-                  <a
-                    href="/register"
+                  <Link
+                    to="/register"
                     className="cursor-pointer rounded-sm bg-purple-500 px-2 py-1 text-sm font-medium text-white shadow-sm shadow-black transition-shadow duration-200 ease-in-out hover:shadow-md"
                   >
                     Register
-                  </a>
+                  </Link>
                   <button
                     type="button"
                     disabled={isSubmitting}

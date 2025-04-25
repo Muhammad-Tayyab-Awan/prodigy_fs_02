@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import authApi from "../api/authApi";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 function Profile() {
   const navigate = useNavigate();
@@ -84,13 +84,13 @@ function Profile() {
               Delete Account
             </span>
           </div>
-          <a
-            href="/logout"
+          <Link
+            to="/logout"
             className="flex cursor-pointer items-center justify-center gap-2"
           >
             <img src="/logout.svg" alt="logout" className="h-4" />
             <span className="text-xs font-medium text-[#6434f4]">Logout</span>
-          </a>
+          </Link>
         </div>
       </div>
       <Toaster position="bottom-center" />
